@@ -10,7 +10,7 @@ import (
 	"github.com/lucyanddarlin/rssagg/internal/databases"
 )
 
-func (apiCfg *apiConfig) handlerCreateUsers(w http.ResponseWriter, r *http.Request) {
+func (apiCfg *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
 		Name string `json:"name"`
 	}
@@ -19,6 +19,10 @@ func (apiCfg *apiConfig) handlerCreateUsers(w http.ResponseWriter, r *http.Reque
 	params := parameters{}
 	err := decoder.Decode(&params)
 	if err != nil {
+		if params.Name == "" {
+			responseWithErr(w, 400, fmt.Sprintln("Params Name is missing"))
+			return
+		}
 		responseWithErr(w, 400, fmt.Sprintln("Error parsing JSON:", err))
 		return
 	}
@@ -35,5 +39,9 @@ func (apiCfg *apiConfig) handlerCreateUsers(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	responseWithJson(w, 201, convertDatabasesUserToUser(user))
+}
+
+func (apiCfg *apiConfig) handlerGetUser(w http.ResponseWriter, r *http.Request, user databases.User) {
 	responseWithJson(w, 200, convertDatabasesUserToUser(user))
 }
